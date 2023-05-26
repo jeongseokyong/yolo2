@@ -8,6 +8,11 @@ Original file is located at
 """
 
 # Commented out IPython magic to ensure Python compatibility.
+# %tensorflow_version 2.x
+from __future__ import absolute_import, division, print_function, unicode_literals
+import tensorflow as tf
+import numpy as np
+from numpy import expand_dims
 import os
 import scipy.io
 import scipy.misc
@@ -17,19 +22,20 @@ import PIL
 import struct
 import cv2
 from numpy import expand_dims
-import tensorflow as tf
 from skimage.transform import resize
-from keras import backend as K
-from keras.layers import Input, Lambda, Conv2D, BatchNormalization, LeakyReLU, ZeroPadding2D, UpSampling2D
-from keras.models import load_model, Model
-from keras.layers.merge import add, concatenate
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
+
+from tensorflow.keras.layers import Input, Lambda, Conv2D, BatchNormalization, LeakyReLU, ZeroPadding2D, UpSampling2D, add, concatenate
+from tensorflow.keras.models import load_model, Model
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
 from matplotlib import pyplot
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import imshow
 from matplotlib.patches import Rectangle
 # %matplotlib inline
+
+from google.colab import drive
+drive.mount('/content/drive')
 
 from IPython.display import display, Javascript
 from google.colab.output import eval_js
@@ -169,18 +175,6 @@ def make_yolov3_model():
 	model = Model(input_image, [yolo_82, yolo_94, yolo_106])
 	return model
 
-# define the yolo v3 model
-yolov3 = make_yolov3_model()
-
-# load the weights
-weight_reader = WeightReader('yolov3.weights')
-
-# set the weights
-weight_reader.load_weights(yolov3)
-
-# save the model to file
-yolov3.save('model.h5')
-
 class WeightReader:
 	def __init__(self, weight_file):
 		with open(weight_file, 'rb') as w_f:
@@ -229,6 +223,18 @@ class WeightReader:
  
 	def reset(self):
 		self.offset = 0
+
+# define the yolo v3 model
+yolov3 = make_yolov3_model()
+
+# load the weights
+weight_reader = WeightReader('yolov3.weights')
+
+# set the weights
+weight_reader.load_weights(yolov3)
+
+# save the model to file
+yolov3.save('model.h5')
 
 class BoundBox:
   def __init__(self, xmin, ymin, xmax, ymax, objness = None, classes = None):
@@ -284,9 +290,6 @@ def decode_netout(netout, anchors, obj_thresh, net_h, net_w):
 			box = BoundBox(x-w/2, y-h/2, x+w/2, y+h/2, objectness, classes)
 			boxes.append(box)
 	return boxes
-
-from google.colab import drive
-drive.mount('/content/drive')
 
 def correct_yolo_boxes(boxes, image_h, image_w, net_h, net_w):
 	new_w, new_h = net_w, net_h
@@ -470,9 +473,8 @@ print([a.shape for a in yhat])
 # based on https://github.com/experiencor/keras-yolo3
 from numpy import expand_dims
 from keras.models import load_model
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
-
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
 # load and prepare an image
 def load_image_pixels(filename, shape):
     # load the image to get its shape
@@ -556,6 +558,8 @@ v_boxes, v_labels, v_scores = get_boxes(boxes, labels, class_threshold)
 for i in range(len(v_boxes)):
     print(v_labels[i], v_scores[i])
 
+print(v_labels[i], v_scores[i])
+
 box = v_boxes[i]
 # get coordinates
 y1, x1, y2, x2 = box.ymin, box.xmin, box.ymax, box.xmax
@@ -587,12 +591,12 @@ def draw_boxes(filename, v_boxes, v_labels, v_scores):
 		# calculate width and height of the box
 		width, height = x2 - x1, y2 - y1
 		# create the shape
-		rect = Rectangle((x1, y1), width, height, fill=False, color='white')
+		rect = Rectangle((x1, y1), width, height, fill=False, color='black')
 		# draw the box
 		ax.add_patch(rect)
 		# draw text and score in top left corner
 		label = "%s (%.3f)" % (v_labels[i], v_scores[i])
-		pyplot.text(x1, y1, label, color='white')
+		pyplot.text(x1, y1, label, color='black')
 	# show the plot
 	pyplot.show()
 
@@ -603,9 +607,9 @@ draw_boxes(photo_filename, v_boxes, v_labels, v_scores)
 # based on https://github.com/experiencor/keras-yolo3
 import numpy as np
 from numpy import expand_dims
-from keras.models import load_model
-from keras.preprocessing.image import load_img
-from keras.preprocessing.image import img_to_array
+from tensorflow.keras.models import load_model, Model
+from tensorflow.keras.preprocessing.image import load_img
+from tensorflow.keras.preprocessing.image import img_to_array
 from matplotlib import pyplot
 from matplotlib.patches import Rectangle
 
@@ -760,12 +764,12 @@ def draw_boxes(filename, v_boxes, v_labels, v_scores):
 		# calculate width and height of the box
 		width, height = x2 - x1, y2 - y1
 		# create the shape
-		rect = Rectangle((x1, y1), width, height, fill=False, color='white')
+		rect = Rectangle((x1, y1), width, height, fill=False, color='black')
 		# draw the box
 		ax.add_patch(rect)
 		# draw text and score in top left corner
 		label = "%s (%.3f)" % (v_labels[i], v_scores[i])
-		pyplot.text(x1, y1, label, color='white')
+		pyplot.text(x1, y1, label, color='black')
 	# show the plot
 	pyplot.show()
 
@@ -820,7 +824,11 @@ price={"person" : 20, "bicycle" : 30, "car" : 40, "motorbike" : 50, "aeroplane" 
 	"remote":570, "keyboard":560, "cell phone":550, "microwave":540, "oven":530, "toaster":520, "sink":510, "refrigerator":500,
 	"book":490, "clock":480, "vase":470, "scissors":460, "teddy bear":450, "hair drier":440, "toothbrush":430}
 
-print('값: {}'.format(price.get(v_labels[i]))+'원')
+print('값: {}'.format(price.get(v_labels[0]))+'원')
+print('값: {}'.format(price.get(v_labels[1]))+'원')
+
 # draw what we found
 draw_boxes(photo_filename, v_boxes, v_labels, v_scores)
+
+int(format(price.get(v_labels[0]))) + int(format((price.get(v_labels[1]))))
 
