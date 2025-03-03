@@ -823,7 +823,7 @@ price={"person" : 20, "bicycle" : 30, "car" : 40, "motorbike" : 50, "aeroplane" 
 	"chair":660, "sofa":650, "pottedplant":640, "bed":630, "diningtable":620, "toilet":610, "tvmonitor":600, "laptop":590, "mouse":580,
 	"remote":570, "keyboard":560, "cell phone":550, "microwave":540, "oven":530, "toaster":520, "sink":510, "refrigerator":500,
 	"book":490, "clock":480, "vase":470, "scissors":460, "teddy bear":450, "hair drier":440, "toothbrush":430}
-
+# 값 구하기
 print('값: {}'.format(price.get(v_labels[0]))+'원')
 print('값: {}'.format(price.get(v_labels[1]))+'원')
 
